@@ -9,6 +9,7 @@ import { Title } from "../components/Title";
 
 export default function RecipeScreen({
   route,
+  navigation,
 }: RootStackScreenProps<"Recipe">) {
   const [nutrition, setNutrition] = useState<MainMacros>();
   const [instructions, setInstructions] = useState<InstructionStep[]>([]);

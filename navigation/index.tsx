@@ -13,21 +13,27 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 import { ColorSchemeName, Pressable, Platform } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
-import ModalScreen from "../screens/ModalScreen";
-import NotFoundScreen from "../screens/NotFoundScreen";
-import SearchRecipeScreen from "../screens/SearchRecipeScreen";
-import RecipeScreen from "../screens/RecipeScreen";
+import {
+  ModalScreen,
+  NotFoundScreen,
+  RecipeScreen,
+  SearchRecipeScreen,
+} from "../screens";
 import {
   RootStackParamList,
   RootStackScreenProps,
   RootTabParamList,
-  RootTabScreenProps,
 } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
+import { useAccount } from "../context";
+import {
+  showSuccessAddFavouriteToast,
+  showSuccuessRemoveFavouriteToast,
+} from "../helpers";
+import { FavouriteRecipeIcon } from "../components";
 
 export default function Navigation({
   colorScheme,
@@ -86,20 +92,9 @@ function RootNavigator() {
               />
             </Pressable>
           ),
-          // headerRight: async () => (
-          //   <Pressable
-          //     style={({ pressed }) => ({
-          //       opacity: pressed ? 0.5 : 1,
-          //     })}
-          //   >
-          //     <FontAwesome
-          //       name="heart"
-          //       size={25}
-          //       color={Colors[colorScheme].text}
-          //       style={{ marginRight: 15, color: "red" }}
-          //     />
-          //   </Pressable>
-          // ),
+          headerRight: () => (
+            <FavouriteRecipeIcon recipeId={route.params.recipeId} />
+          ),
         })}
       />
       <Stack.Group screenOptions={{ presentation: "modal" }}>

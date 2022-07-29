@@ -78,7 +78,11 @@ export default function SearchRecipeScreen({
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
-      {hasError && <Text>Please type something in the search bar first </Text>}
+      {hasError && (
+        <Text style={{ color: "red" }}>
+          Please type something in the search bar first{" "}
+        </Text>
+      )}
       <TextInput
         style={{ ...styles.input }}
         value={text}
