@@ -36,9 +36,6 @@ export const getInstructionsByRecipeId = async (
       headers: { "x-api-key": Constants.manifest?.extra?.SPOONCULAR_API_KEY },
     }
   ).then((r) => r.json() as Promise<InstructionsResponse[]>);
-  console.log("🚀 ----------------------------------------------");
-  console.log("🚀 ~ file: spooncular.ts ~ line 39 ~ resp", resp);
-  console.log("🚀 ----------------------------------------------");
 
   return resp;
 };
