@@ -1,20 +1,35 @@
+import { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 
-import { Text, View } from "../components/Themed";
+import { ScrollView, Text, View } from "../components/Themed";
 import { RootStackScreenProps } from "../types";
+import { useAccount } from "../context";
+import { Title } from "../components/Title";
+import { MealSummaryPanel } from "../components";
 
 export const HomeScreen = ({
   navigation,
 }: RootStackScreenProps<"NotFound">) => {
+  const {
+    meals: { breakfasts, dinners, lunches },
+  } = useAccount();
+
+  useEffect(() => {}, [breakfasts, dinners, lunches]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Home screen</Text>
-      <TouchableOpacity
-        onPress={() => navigation.replace("Root")}
-        style={styles.link}
-      >
-        <Text style={styles.linkText}>Go to home screen!</Text>
-      </TouchableOpacity>
+      <Title style={styles.title} alignCenter>
+        Home screen
+      </Title>
+      <ScrollView>
+        <MealSummaryPanel panelTitle="Breakfasts" data={breakfasts} />
+        <MealSummaryPanel panelTitle="Lunches" data={lunches} />
+        <MealSummaryPanel panelTitle="Dinners" data={dinners} />
+        <MealSummaryPanel
+          panelTitle="Day"
+          data={[...breakfasts, ...lunches, ...dinners]}
+        />
+      </ScrollView>
     </View>
   );
 };
@@ -22,13 +37,11 @@ export const HomeScreen = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     padding: 20,
+    marginTop: 20,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "bold",
+    marginBottom: 30,
   },
   link: {
     marginTop: 15,
@@ -37,6 +50,12 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: 14,
     color: "#2e78b7",
+  },
+  mealPanelView: {
+    backgroundColor: "#fff",
+  },
+  mealPanelText: {
+    marginBottom: 10,
   },
 });
 

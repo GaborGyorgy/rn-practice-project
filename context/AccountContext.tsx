@@ -6,26 +6,17 @@ import {
   useContext,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { MealTypes, RecipeInfo } from "../types";
+import { Meals, MealTypes, Recipe } from "../types";
 
 interface Props {
   children: ReactNode;
 }
-
-type Recipe = Omit<RecipeInfo, "imagetype"> & {
-  calories: string;
-  carbs: string;
-  fat: string;
-  protein: string;
-};
 interface IAccountContext {
   favouriteRecipes: number[];
   addFavouriteRecipe: (recipeId: number) => Promise<void>;
   removeFavouriteRecipe: (recipeId: number) => Promise<void>;
   addMeal: (meal: MealTypes, recipe: Recipe) => Promise<void>;
-  breakfasts: Recipe[];
-  lunches: Recipe[];
-  dinners: Recipe[];
+  meals: Meals;
 }
 
 export const AccountContext = createContext<IAccountContext>({
@@ -33,25 +24,21 @@ export const AccountContext = createContext<IAccountContext>({
   addFavouriteRecipe: async () => {},
   removeFavouriteRecipe: async () => {},
   addMeal: async (meal: MealTypes, recipe: Recipe) => {},
-  breakfasts: [],
-  lunches: [],
-  dinners: [],
+  meals: { breakfasts: [], lunches: [], dinners: [] },
 });
 
 const FAVOURITE_RECIPES_STORAGE_KEY = "favouriteRecipes";
 
-const BREAKFAST_STORAGE_KEY = "breakfasts";
-const LUNCH_STORAGE_KEY = "lunches";
-const DINNER_STORAGE_KEY = "dinners";
-
-type MealKeyType = "breakfasts" | "lunches" | "dinners";
+const MEALS_STORAGE_KEY = "meals";
 
 // this should be renamed to something else but i havent decided a proper name yet
 export const AccountProvider = ({ children }: Props): JSX.Element => {
   const [favouriteRecipes, setFavouriteRecipes] = useState<number[]>([]);
-  const [breakfasts, setBreakfasts] = useState<Recipe[]>([]);
-  const [lunches, setLunches] = useState<Recipe[]>([]);
-  const [dinners, setDinners] = useState<Recipe[]>([]);
+  const [meals, setMeals] = useState<Meals>({
+    breakfasts: [],
+    lunches: [],
+    dinners: [],
+  });
 
   const getFavouriteRecipesFromStorage = async () => {
     const savedFavourites = await AsyncStorage.getItem(
@@ -85,45 +72,18 @@ export const AccountProvider = ({ children }: Props): JSX.Element => {
   };
 
   const getMealsFromStorage = async () => {
-    const [[, breakfasts], [, lunches], [, dinners]] =
-      await AsyncStorage.multiGet([
-        BREAKFAST_STORAGE_KEY,
-        LUNCH_STORAGE_KEY,
-        DINNER_STORAGE_KEY,
-      ]);
+    const mealsInStorage = await AsyncStorage.getItem(MEALS_STORAGE_KEY);
 
-    if (breakfasts) {
-      const parsed = JSON.parse(breakfasts);
-      setBreakfasts(parsed);
-    }
-
-    if (lunches) {
-      const parsed = JSON.parse(lunches);
-      setLunches(parsed);
-    }
-
-    if (dinners) {
-      const parsed = JSON.parse(dinners);
-      setDinners(parsed);
+    if (mealsInStorage) {
+      setMeals(JSON.parse(mealsInStorage));
     }
   };
 
   const addMeal = async (meal: MealTypes, recipe: Recipe) => {
-    await AsyncStorage.setItem(meal, JSON.stringify(recipe));
-
-    if (meal === "breakfasts") {
-      const mealClone = [...breakfasts];
-      mealClone.push(recipe);
-      setBreakfasts(mealClone);
-    } else if (meal === "lunches") {
-      const mealClone = [...lunches];
-      mealClone.push(recipe);
-      setLunches(mealClone);
-    } else if (meal === "dinners") {
-      const mealClone = [...dinners];
-      mealClone.push(recipe);
-      setDinners(mealClone);
-    }
+    const mealsClone = Object.assign({}, meals);
+    mealsClone[meal].push(recipe);
+    setMeals(mealsClone);
+    await AsyncStorage.setItem(MEALS_STORAGE_KEY, JSON.stringify(mealsClone));
   };
 
   useEffect(() => {
@@ -138,9 +98,7 @@ export const AccountProvider = ({ children }: Props): JSX.Element => {
     addFavouriteRecipe,
     removeFavouriteRecipe,
     addMeal,
-    breakfasts,
-    lunches,
-    dinners,
+    meals,
   };
 
   return (

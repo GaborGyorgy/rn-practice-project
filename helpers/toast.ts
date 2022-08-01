@@ -1,4 +1,5 @@
 import Toast, { ToastOptions } from "react-native-root-toast";
+import { MealTypes } from "../types";
 
 const toastOptions: ToastOptions = {
   duration: Toast.durations.SHORT,
@@ -14,4 +15,8 @@ export const showSuccessAddFavouriteToast = () => {
 
 export const showSuccuessRemoveFavouriteToast = () => {
   Toast.show("Successfully added to favourites", toastOptions);
+};
+
+export const showSuccessAddToMealToast = (meal: MealTypes) => {
+  Toast.show(`Successfully added to ${meal}.`, toastOptions);
 };

@@ -18,7 +18,6 @@ export const FAB: FunctionComponent<Props> = ({ actions }) => {
     <Provider>
       <Portal>
         <Fab.Group
-          style={{ position: "absolute", bottom: 15, right: 15 }}
           open={isOpen}
           icon="plus"
           onStateChange={onStateChange}

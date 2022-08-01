@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Image } from "react-native";
 
-import { InstructionStep, MainMacros, RootStackScreenProps } from "../types";
+import {
+  InstructionStep,
+  MainMacros,
+  MealTypes,
+  RootStackScreenProps,
+} from "../types";
 import { spooncular } from "../api";
 import { shared } from "../styles";
 import { Panel, Text, View, ScrollView, FAB } from "../components";
 import { Title } from "../components/Title";
 import { useAccount } from "../context";
+import { showSuccessAddToMealToast } from "../helpers";
 
 export default function RecipeScreen({
   route,
-  navigation,
 }: RootStackScreenProps<"Recipe">) {
   const [nutrition, setNutrition] = useState<MainMacros>();
   const [instructions, setInstructions] = useState<InstructionStep[]>([]);
@@ -31,9 +36,7 @@ export default function RecipeScreen({
     fetchData();
   }, [recipeId]);
 
-  const addRecipeToMeal = async (
-    meal: "breakfasts" | "lunches" | "dinners"
-  ) => {
+  const addRecipeToMeal = async (meal: MealTypes) => {
     await addMeal(meal, {
       id: recipeId,
       image: recpieImage,
@@ -43,6 +46,7 @@ export default function RecipeScreen({
       fat: nutrition?.fat!,
       protein: nutrition?.protein!,
     });
+    showSuccessAddToMealToast(meal);
   };
 
   const fabActions = [
@@ -87,8 +91,8 @@ export default function RecipeScreen({
 
           <View>
             <Title style={shared.mb10}>Instructions</Title>
-            {instructions.map(({ step, ingredients }) => (
-              <Panel>
+            {instructions.map(({ step, ingredients }, index) => (
+              <Panel key={index}>
                 <Text style={{ marginBottom: 10 }}>{step}</Text>
                 <Text>
                   <Text style={{ fontWeight: "bold" }}>Ingredients:</Text>{" "}
