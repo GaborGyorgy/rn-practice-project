@@ -12,28 +12,24 @@ import {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
-import { ColorSchemeName, Pressable, Platform } from "react-native";
+import { ColorSchemeName } from "react-native";
+import { NavBackButton } from "../components";
 
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
 import {
+  HomeScreen,
   ModalScreen,
   NotFoundScreen,
   RecipeScreen,
   SearchRecipeScreen,
 } from "../screens";
 import {
+  RecipeTabNavigation,
   RootStackParamList,
-  RootStackScreenProps,
   RootTabParamList,
 } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
-import { useAccount } from "../context";
-import {
-  showSuccessAddFavouriteToast,
-  showSuccuessRemoveFavouriteToast,
-} from "../helpers";
-import { FavouriteRecipeIcon } from "../components";
 
 export default function Navigation({
   colorScheme,
@@ -57,45 +53,17 @@ export default function Navigation({
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
-  const colorScheme = useColorScheme();
-
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName="Home">
       <Stack.Screen
-        name="SearchRecipe"
-        component={SearchRecipeScreen}
+        name="Root"
+        component={BottomTabNavigator}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="NotFound"
         component={NotFoundScreen}
         options={{ title: "Oops!" }}
-      />
-
-      <Stack.Screen
-        name="Recipe"
-        component={RecipeScreen}
-        options={({ navigation, route }: RootStackScreenProps<"Recipe">) => ({
-          headerTitle: "",
-          headerLeft: () => (
-            <Pressable
-              onPress={() => navigation.goBack()}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.5 : 1,
-              })}
-            >
-              <FontAwesome
-                name={Platform.OS === "android" ? "arrow-left" : "chevron-left"}
-                size={25}
-                color={Colors[colorScheme].text}
-                style={{ marginRight: 15 }}
-              />
-            </Pressable>
-          ),
-          headerRight: () => (
-            <FavouriteRecipeIcon recipeId={route.params.recipeId} />
-          ),
-        })}
       />
       <Stack.Group screenOptions={{ presentation: "modal" }}>
         <Stack.Screen name="Modal" component={ModalScreen} />
@@ -104,31 +72,25 @@ function RootNavigator() {
   );
 }
 
-{
-  /* <BottomTab.Screen
-name="Recipe"
-component={RecipeScreen}
-options={({ navigation }: RootTabScreenProps<"Recipe">) => ({
-  headerTitle: "",
-  tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-  headerLeft: () => (
-    <Pressable
-      onPress={() => navigation.goBack()}
-      style={({ pressed }) => ({
-        opacity: pressed ? 0.5 : 1,
-      })}
-    >
-      <FontAwesome
-        name={Platform.OS === "android" ? "arrow-left" : "chevron-left"}
-        size={25}
-        color={Colors[colorScheme].text}
-        style={{ marginRight: 15 }}
-      />
-    </Pressable>
-  ),
-})}
-/> */
-}
+const RecipeStack = createNativeStackNavigator<RecipeTabNavigation>();
+
+const RecipeNavigator = () => (
+  <RecipeStack.Navigator initialRouteName="SearchRecipe">
+    <RecipeStack.Screen
+      name="Recipe"
+      component={RecipeScreen}
+      options={{ headerLeft: () => <NavBackButton />, animation: "default" }}
+    />
+    <RecipeStack.Screen
+      name="SearchRecipe"
+      component={SearchRecipeScreen}
+      options={{
+        headerTitle: "",
+        headerLeft: () => <NavBackButton />,
+      }}
+    />
+  </RecipeStack.Navigator>
+);
 
 /**
  * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
@@ -136,43 +98,62 @@ options={({ navigation }: RootTabScreenProps<"Recipe">) => ({
  */
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
-// function BottomTabNavigator() {
-//   const colorScheme = useColorScheme();
+function BottomTabNavigator() {
+  const colorScheme = useColorScheme();
 
-//   return (
-//     <BottomTab.Navigator
-//       initialRouteName="SearchRecipe"
-//       screenOptions={{
-//         tabBarActiveTintColor: Colors[colorScheme].tint,
-//       }}
-//       backBehavior="history"
-//     >
-//       <BottomTab.Screen
-//         name="SearchRecipe"
-//         component={SearchRecipeScreen}
-//         options={({ navigation }: RootTabScreenProps<"SearchRecipe">) => ({
-//           title: "Tab One",
-//           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-//           headerRight: () => (
-//             <Pressable
-//               onPress={() => navigation.navigate("Modal")}
-//               style={({ pressed }) => ({
-//                 opacity: pressed ? 0.5 : 1,
-//               })}
-//             >
-//               <FontAwesome
-//                 name="info-circle"
-//                 size={25}
-//                 color={Colors[colorScheme].text}
-//                 style={{ marginRight: 15 }}
-//               />
-//             </Pressable>
-//           ),
-//         })}
-//       />
-//     </BottomTab.Navigator>
-//   );
-// }
+  return (
+    <BottomTab.Navigator
+      initialRouteName="Home"
+      screenOptions={{
+        tabBarActiveTintColor: Colors[colorScheme].tint,
+      }}
+      backBehavior="history"
+    >
+      <BottomTab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+        }}
+      />
+      <BottomTab.Screen
+        name="RecipeRoot"
+        component={RecipeNavigator}
+        options={{
+          tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
+          headerShown: false,
+          lazy: true,
+          tabBarLabel: "Recipe Search",
+        }}
+      />
+      {/* <BottomTab.Screen name="Recipe" component={RecipeScreen} /> */}
+
+      {/* <BottomTab.Screen
+        name="SearchRecipe"
+        component={SearchRecipeScreen}
+        options={({ navigation }: RootTabScreenProps<"SearchRecipe">) => ({
+          title: "Tab One",
+          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          headerRight: () => (
+            <Pressable
+              onPress={() => navigation.navigate("Modal")}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.5 : 1,
+              })}
+            >
+              <FontAwesome
+                name="info-circle"
+                size={25}
+                color={Colors[colorScheme].text}
+                style={{ marginRight: 15 }}
+              />
+            </Pressable>
+          ),
+        })}
+      /> */}
+    </BottomTab.Navigator>
+  );
+}
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
